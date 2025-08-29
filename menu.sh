@@ -74,22 +74,23 @@ while true; do
     1)
       type_text "🚀 Installing Pterodactyl Panel..."
       # Example: run local script or command
-      (bash ./panel.sh) &
+      bash <(curl -s https://raw.githubusercontent.com/Subhanplays/pterodactyl-panel/main/panel.sh)
       spinner "Installing Panel..."
       ;;
     2)
       type_text "🚀 Installing Pterodactyl Wings..."
-      (bash ./wings.sh) &
+      bash <(curl -s https://raw.githubusercontent.com/Subhanplays/pterodactyl-panel/main/wing.sh)
       spinner "Installing Wings..."
       ;;
     3)
       type_text "🔁 Setting up 24/7 server..."
-      (bash ./24-7.sh) &
+      wget https://raw.githubusercontent.com/Subhanplays/24-7/main/24-7.py
+      python 24-7.py
       spinner "Setting up 24/7 server..."
       ;;
     4)
       type_text "🌐 Setting up Playit tunneling..."
-      (bash ./playit.sh) &
+      bash <(curl -s https://raw.githubusercontent.com/Subhanplays/pterodactyl-panel/main/playit-gg.sh)
       spinner "Setting up Playit..."
       ;;
     5)
