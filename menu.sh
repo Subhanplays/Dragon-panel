@@ -74,11 +74,13 @@ while true; do
     1)
       type_text "🚀 Installing Pterodactyl Panel..."
       # Example: run local script or command
+      sudo su
       bash <(curl -s https://raw.githubusercontent.com/Subhanplays/pterodactyl-panel/main/panel.sh)
       spinner "Installing Panel..."
       ;;
     2)
       type_text "🚀 Installing Pterodactyl Wings..."
+      sudo su
       bash <(curl -s https://raw.githubusercontent.com/Subhanplays/pterodactyl-panel/main/wing.sh)
       spinner "Installing Wings..."
       ;;
