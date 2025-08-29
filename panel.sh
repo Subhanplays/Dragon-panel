@@ -1,16 +1,28 @@
-
 #!/bin/bash
 
-clear
+# -----------------------------
+# Subhan Plays Panel Installer
+# -----------------------------
+
+# ASCII Art: Subhan Plays
+ascii_art="
+  ____        _     _                 ____  _                 
+ / ___| _   _| |__ | | ___  _ __     |  _ \| | __ _ _   _ ___ 
+ \___ \| | | | '_ \| |/ _ \| '_ \    | |_) | |/ _\` | | | / __|
+  ___) | |_| | |_) | | (_) | | | |   |  __/| | (_| | |_| \__ \\
+ |____/ \__,_|_.__/|_|\___/|_| |_|   |_|   |_|\__,_|\__, |___/
+                                                     |___/     
+"
 
 # Colors
 RED='\033[0;31m'
-GRN='\033[0;32m'
-CYN='\033[0;36m'
-YEL='\033[1;33m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
 
-# Function: typing effect
+# Typing effect
 type_text() {
   text="$1"
   delay="${2:-0.03}"
@@ -21,7 +33,7 @@ type_text() {
   echo
 }
 
-# Function: spinning loader
+# Spinner function
 spinner() {
   pid=$!
   spin='-\|/'
@@ -34,125 +46,48 @@ spinner() {
   printf "\r\033[K"
 }
 
-# Custom ASCII Logo
-echo -e "${YEL}"
-cat << "EOF"
-███████╗██████╗ 
-██╔════╝██╔══██╗
-███████╗██████╔╝
-╚════██║██╔═══╝ 
-███████║██║     
-╚══════╝╚═╝     
-EOF
-echo -e "${NC}"
+# Clear screen and show ASCII art
+clear
+echo -e "${CYAN}$ascii_art${NC}"
 
-type_text "🚀 Setting up your Pterodactyl Panel environment..." 0.05
-sleep 1
+# Ensure script is run as root
+if [ "$EUID" -ne 0 ]; then
+  echo -e "${RED}Please run this script as root.${NC}"
+  exit 1
+fi
 
-# Installing Docker Compose with spinner
-type_text "📦 Installing Docker Compose..."
-(apt update && apt install docker-compose -y) &
-spinner "Installing Docker Compose..."
+# -----------------------------
+# Installing Dependencies
+# -----------------------------
+type_text "* Installing Dependencies..."
+(apt update -y && apt install -y curl software-properties-common git zip unzip) &
+spinner "Updating and installing packages..."
 
-# Setting up directories with animated dots
-type_text "🛠 Setting up Pterodactyl Panel directories..."
-mkdir -p pterodactyl/panel
-cd pterodactyl/panel || exit
+type_text "* Installing Node.js 20..."
+(curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt install -y nodejs) &
+spinner "Installing Node.js..."
 
-dots="...."
-for i in $(seq 1 3); do
-  printf "\r${CYN}Creating directories${dots:0:$i}${NC}"
-  sleep 0.5
-done
-echo -e "\r${CYN}Directories created!     ${NC}"
+type_text "* Dependencies installed successfully!" 0.03
 
-# Writing docker-compose.yml with typing effect
-type_text "📝 Writing docker-compose.yml..."
-cat <<EOF > docker-compose.yml
-version: '3.8'
+# -----------------------------
+# Cloning Panel Repository
+# -----------------------------
+type_text "* Cloning Subhan Plays Panel repository..."
+(git clone https://github.com/dragonlabsdev/v3panel && cd v3panel) &
+spinner "Cloning repository..."
 
-x-common:
-  database:
-    &db-environment
-    MYSQL_PASSWORD: &db-password "CHANGE_ME"
-    MYSQL_ROOT_PASSWORD: "CHANGE_ME_TOO"
-  panel:
-    &panel-environment
-    APP_URL: "https://pterodactyl.example.com"
-    APP_TIMEZONE: "UTC"
-    APP_SERVICE_AUTHOR: "admin@subhanzahid.com"
-    TRUSTED_PROXIES: "*"
-  mail:
-    &mail-environment
-    MAIL_FROM: "admin@example.com"
-    MAIL_DRIVER: "smtp"
-    MAIL_HOST: "mail"
-    MAIL_PORT: "1025"
-    MAIL_USERNAME: ""
-    MAIL_PASSWORD: ""
-    MAIL_ENCRYPTION: "true"
+type_text "* Installing Panel files..."
+(apt install -y zip && unzip panel.zip && cd panel && npm install) &
+spinner "Installing Panel files..."
 
-services:
-  database:
-    image: mariadb:10.5
-    restart: always
-    command: --default-authentication-plugin=mysql_native_password
-    volumes:
-      - "./data/database:/var/lib/mysql"
-    environment:
-      <<: *db-environment
-      MYSQL_DATABASE: "panel"
-      MYSQL_USER: "pterodactyl"
+# Seed database and create admin
+type_text "* Setting up Panel database and admin user..."
+(npm run seed && npm run createUser) &
+spinner "Seeding database..."
 
-  cache:
-    image: redis:alpine
-    restart: always
+# Install PM2 and start panel
+type_text "* Installing PM2 and starting Panel..."
+(npm i -g pm2 && pm2 start .) &
+spinner "Starting Panel with PM2..."
 
-  panel:
-    image: ghcr.io/pterodactyl/panel:latest
-    restart: always
-    ports:
-      - "8030:80"
-      - "4433:443"
-    links:
-      - database
-      - cache
-    volumes:
-      - "./data/var:/app/var"
-      - "./data/nginx:/etc/nginx/http.d"
-      - "./data/certs:/etc/letsencrypt"
-      - "./data/logs:/app/storage/logs"
-    environment:
-      <<: [*panel-environment, *mail-environment]
-      DB_PASSWORD: *db-password
-      APP_ENV: "production"
-      APP_ENVIRONMENT_ONLY: "false"
-      CACHE_DRIVER: "redis"
-      SESSION_DRIVER: "redis"
-      QUEUE_DRIVER: "redis"
-      REDIS_HOST: "cache"
-      DB_HOST: "database"
-      DB_PORT: "3306"
-
-networks:
-  default:
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
-EOF
-
-# Creating data directories with spinner
-type_text "📁 Creating data directories..."
-(mkdir -p ./data/{database,var,nginx,certs,logs}) &
-spinner "Creating directories..."
-
-# Starting containers with spinner
-type_text "🚀 Starting Pterodactyl containers..."
-(docker-compose up -d) &
-spinner "Starting containers..."
-
-# Creating admin user with typing effect
-type_text "👤 Creating Admin User..."
-docker-compose run --rm panel php artisan p:user:make
-
-type_text "✅ All done! Enjoy your Pterodactyl Panel setup, SubhanPlayz!" 0.05
+type_text "* Subhan Plays Panel installed and running on port 3001!" 0.03
