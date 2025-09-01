@@ -53,11 +53,11 @@ cd v4panel || { echo -e "${RED}Failed to enter v4panel directory${NC}"; exit 1; 
 # -----------------------------
 if [ -f panel.zip ]; then
   echo -e "${GREEN}* Extracting panel.zip...${NC}"
-  unzip panel.zip
+  unzip v4panel.zip
 fi
 
 if [ -d panel ]; then
-  cd panel || { echo -e "${RED}Failed to enter panel directory${NC}"; exit 1; }
+  cd v4panel || { echo -e "${RED}Failed to enter panel directory${NC}"; exit 1; }
 fi
 
 echo -e "${GREEN}* Installing Node.js dependencies...${NC}"
