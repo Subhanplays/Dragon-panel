@@ -44,8 +44,8 @@ echo "* Dependencies installed successfully!"
 # Cloning Panel Repository
 # -----------------------------
 echo "* Cloning Subhan Plays Panel repository..."
-git clone https://github.com/dragonlabsdev/v3panel
-cd v3panel || exit
+git clone https://github.com/teryxlabs/v4panel
+cd v4panel || exit
 
 echo "* Installing Panel files..."
 apt install -y zip
