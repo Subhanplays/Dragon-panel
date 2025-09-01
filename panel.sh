@@ -1,12 +1,8 @@
 #!/bin/bash
 
-# -----------------------------
-# Subhan Plays Panel Installer
-# -----------------------------
-
-# ASCII Art: Subhan Plays
+# ASCII Art: Subhan Plays Panel
 ascii_art="
-  ____        _     _                 ____  _                 
+  ____        _     _                 ____  _                  
  / ___| _   _| |__ | | ___  _ __     |  _ \\| | __ _ _   _ ___ 
  \\___ \\| | | | '_ \\| |/ _ \\| '_ \\    | |_) | |/ _\` | | | / __|
   ___) | |_| | |_) | | (_) | | | |   |  __/| | (_| | |_| \\__ \\
@@ -16,67 +12,59 @@ ascii_art="
 
 # Colors
 RED='\033[0;31m'
-CYAN='\033[0;36m'
 GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
 
-# Clear screen and show ASCII art
+# Clear the screen
 clear
-echo -e "${CYAN}$ascii_art${NC}"
-
-# Ensure script is run as root
+# Check if the script is run as root
 if [ "$EUID" -ne 0 ]; then
   echo -e "${RED}Please run this script as root.${NC}"
   exit 1
 fi
 
-# -----------------------------
-# Installing Dependencies
-# -----------------------------
-echo -e "${GREEN}* Installing Dependencies...${NC}"
-apt update -y
-apt install -y curl software-properties-common git zip unzip
-curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-apt install -y nodejs
+echo -e "${CYAN}$ascii_art${NC}"
 
-echo -e "${GREEN}* Dependencies installed successfully!${NC}"
+echo_message "* Installing Dependencies"
 
-# -----------------------------
-# Cloning Panel Repository
-# -----------------------------
-echo -e "${GREEN}* Cloning Subhan Plays Panel repository...${NC}"
-git clone https://github.com/teryxlabs/v4panel
-cd v4panel || { echo -e "${RED}Failed to enter v4panel directory${NC}"; exit 1; }
+# Update package list and install dependencies
+sudo apt update
+sudo apt install -y curl software-properties-common
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install nodejs -y 
+sudo apt install git -y
 
-# -----------------------------
-# Installing Panel Files
-# -----------------------------
-if [ -f panel.zip ]; then
-  echo -e "${GREEN}* Extracting panel.zip...${NC}"
-  unzip v4panel.zip
-fi
+echo_message "* Installed Dependencies"
 
-if [ -d panel ]; then
-  cd v4panel || { echo -e "${RED}Failed to enter panel directory${NC}"; exit 1; }
-fi
+echo_message "* Installing Files"
 
-echo -e "${GREEN}* Installing Node.js dependencies...${NC}"
+# Create directory, clone repository, and install files
+mkdir -p panel5
+cd panel5 || { echo_message "Failed to change directory to panel5"; exit 1; }
+git clone https://github.com/achul123/panel5.git
+cd panel5 || { echo_message "Failed to change directory to panel"; exit 1; }
 npm install
 
-# -----------------------------
-# Setting up Database & Admin
-# -----------------------------
-echo -e "${GREEN}* Setting up Panel database and admin user...${NC}"
+echo_message "* Installed Files"
+
+echo_message "* Starting Subhan Plays Panel"
+
+# Run setup scripts
 npm run seed
 npm run createUser
 
-# -----------------------------
-# Installing PM2 and Starting Panel
-# -----------------------------
-echo -e "${GREEN}* Installing PM2 and starting Panel...${NC}"
-npm install -g pm2
+echo_message "* Starting Subhan Plays Panel With PM2"
 
-# Replace 'index.js' with your main JS file if different
-pm2 start index.js --name "subhan-panel"
+# Install panel and start the application
+sudo npm install -g pm2
+pm2 start index.js
 
-echo -e "${GREEN}* Subhan Plays Panel installed and running on port 3001!${NC}"
+echo_message "* Subhan Plays Panel Installed and Started on Port 3001"
+
+# Clear the screen after finishing
+clear
+echo "* Made by Jishnu"
+
