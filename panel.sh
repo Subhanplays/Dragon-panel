@@ -50,7 +50,7 @@ cd v4panel || exit
 echo "* Installing Panel files..."
 apt install -y zip
 unzip panel.zip
-cd panel || exit
+cd v4panel || exit
 npm install
 
 # Seed database and create admin
