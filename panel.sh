@@ -66,5 +66,5 @@ echo_message "* Subhan Plays Panel Installed and Started on Port 3001"
 
 # Clear the screen after finishing
 clear
-echo "* Made by Jishnu"
+echo "* Made by Subhanplays"
 
